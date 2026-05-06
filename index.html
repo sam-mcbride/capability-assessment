@@ -26,8 +26,6 @@ const PWC = {
 };
 
 const BAR_COLOR = PWC.black;
-const BASE_PATH = window.location.pathname.replace(/\/?index\.html$/, "").replace(/\/$/, "");
-const dataUrl = p => `${BASE_PATH}/data/${p}`;
 
 const OWNER_PHASES = [
   {id:"strategy",label:"Strategy"},{id:"finance",label:"Finance"},
@@ -308,8 +306,7 @@ function CategoryRow({category,isExpanded,onToggle,activePersona,personas,items,
 /* ============================================================
    ASSESSMENT VIEW
    ============================================================ */
-function AssessmentView({title,subtitle,personas:rawPersonas,phases,phaseColors,categories,showRisk}){
-  const personas=rawPersonas.map(p=>p.capabilities instanceof Set?p:{...p,capabilities:new Set(p.capabilities)});
+function AssessmentView({title,subtitle,personas,phases,phaseColors,categories,showRisk}){
   const[expanded,setExpanded]=useState(null);const[allExpanded,setAllExpanded]=useState(false);
   const[activePersona,setActivePersona]=useState(null);
   const[selected,setSelected]=useState(new Map());const[copied,setCopied]=useState(false);
@@ -362,24 +359,14 @@ function AssessmentView({title,subtitle,personas:rawPersonas,phases,phaseColors,
    ============================================================ */
 function App(){
   const[view,setView]=useState("owner");
-  const[fwOwner,setFwOwner]=useState(null);
-  const[fwInvestor,setFwInvestor]=useState(null);
-  useEffect(()=>{
-    fetch(dataUrl("owner_framework.json")).then(r=>r.json()).then(d=>{
-      setFwOwner(d);
-    }).catch(()=>console.log("Using default owner data"));
-    fetch(dataUrl("investor_framework.json")).then(r=>r.json()).then(d=>{
-      setFwInvestor(d);
-    }).catch(()=>console.log("Using default investor data"));
-  },[]);
   const ownerColors=["#FD5108","#F46318","#EB7528","#E28738","#D99948","#D0AB58"];
   const investorColors=["#FD5108","#F46318","#EB7528","#D99948","#D0AB58"];
 
   return React.createElement("div",{style:{minHeight:"100vh",backgroundColor:"#fff"}},
     React.createElement("div",{style:{display:"flex",gap:0,borderBottom:`2px solid ${PWC.grey200}`,maxWidth:740,margin:"0 auto",paddingTop:8}},
       ["owner","investor"].map(v=>React.createElement("button",{key:v,onClick:()=>setView(v),style:{padding:"10px 24px",fontFamily:"Arial,sans-serif",fontSize:13,fontWeight:"bold",color:view===v?PWC.orange:PWC.grey500,backgroundColor:"transparent",border:"none",cursor:"pointer",borderBottom:view===v?`3px solid ${PWC.orange}`:"3px solid transparent",marginBottom:-2,transition:"all 0.2s"}},v==="owner"?"Owner Perspective":"Investor Perspective"))),
-    view==="owner"&&React.createElement(AssessmentView,{title:"One infrastructure capability assessment",subtitle:"Owner perspective",personas:fwOwner?fwOwner.personas:OWNER_PERSONAS,phases:fwOwner?fwOwner.phases:OWNER_PHASES,phaseColors:fwOwner?fwOwner.phaseColors:ownerColors,categories:fwOwner?fwOwner.categories:OWNER_DATA,showRisk:true}),
-    view==="investor"&&React.createElement(AssessmentView,{title:"One infrastructure capability assessment",subtitle:"Investor perspective",personas:fwInvestor?fwInvestor.personas:INVESTOR_PERSONAS,phases:fwInvestor?fwInvestor.phases:INVESTOR_PHASES,phaseColors:fwInvestor?fwInvestor.phaseColors:investorColors,categories:fwInvestor?fwInvestor.categories:INVESTOR_DATA,showRisk:false}));
+    view==="owner"&&React.createElement(AssessmentView,{title:"One infrastructure capability assessment",subtitle:"Owner perspective",personas:OWNER_PERSONAS,phases:OWNER_PHASES,phaseColors:ownerColors,categories:OWNER_DATA,showRisk:true}),
+    view==="investor"&&React.createElement(AssessmentView,{title:"One infrastructure capability assessment",subtitle:"Investor perspective",personas:INVESTOR_PERSONAS,phases:INVESTOR_PHASES,phaseColors:investorColors,categories:INVESTOR_DATA,showRisk:false}));
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
